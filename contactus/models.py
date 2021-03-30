@@ -25,7 +25,7 @@ class Contact(models.Model):
 class MassEmail(models.Model):
 	key = models.CharField(default=random_key, max_length=13, unique=True)
 	datetime = models.DateTimeField(auto_now=True)
-	name = models.CharField(max_length=30, blank=True, null=True)
+	admin_name = models.CharField(max_length=30, blank=True, null=True)
 	subject = models.CharField(max_length=50)
 	text = models.TextField()
 
