@@ -5,7 +5,7 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
-from .models import Contact
+from .models import Contact, MassEmail
 from .utils import get_client_ip
 from .serializers import ContactSerializer
 class CreateForm(APIView):
@@ -59,5 +59,22 @@ class AdminEditIsReaded(APIView):
 		contact.save()
 		return Response(status=status.HTTP_200_OK, data={"detail": "updated"})
 
-# class AdminSendMassEmail(APIView):
-	
+class AdminSendMassEmail(APIView):
+	permission_classes = (permissions.IsAdminUser, )
+
+	def post(self, request, format=None):
+		fields = ["subject", "text"]
+		for field in fields:
+			if not field in request:
+				return Response(status=status.HTTP_400_BAD_REQUEST, data={"detail": "field '{0}' not provided.".format(field)})
+
+		email = MassEmail.objects.create(subject=request.data["subject"], text=request.data["text"])
+		if "name" in request.data:
+			email.name = request.data["name"]
+		email.save()
+		mail_subject = request.data["subject"]
+		message = request.data["text"]
+		all_emails = list(Contact.objects.all().values_list("email", flat=True))
+		send_email = EmailMessage(mail_subject, message, to=all_emails).send()
+		return Response(status=status.HTTP_200_OK, data={"detail": "mass email sent.", "emails": all_emails})
+
