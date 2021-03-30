@@ -16,13 +16,13 @@ class CreateForm(APIView):
 		for field in required_fields:
 			if not field in request.data:
 				return Response(status=status.HTTP_400_BAD_REQUEST, data={"detail": "{} is required".format(field)})
-		# ip = get_client_ip(request)
+		ip = get_client_ip(request)
 		contact = Contact.objects.create(
 			name=request.data["name"],
 			email=request.data["email"],
 			text=request.data["text"]
 		)
-		contact.ip = request.data["ip"]
+		contact.ip = ip
 		if "subject" in request.data:
 			contact.subject = request.data["subject"]
 		if "phone_number" in request.data:
@@ -32,7 +32,7 @@ class CreateForm(APIView):
 
 		contact.save()
 		admin_name = list(User.objects.filter(is_superuser=True, is_staff=True).values_list("first_name", flat=True))[0]
-		mail_subject = "{0} Contact Us".format(settings.APP_NAME)
+		mail_subject = "{0} Contact Us ".format(settings.APP_NAME)
 		message = "dear '{0}',\n we got your email. we will response as soon as possible.\n\nBest Regards '{1}'".format(contact.name, admin_name)
 		to_email = contact.email
 		send_email = EmailMessage(mail_subject, message, to=[to_email]).send()
@@ -43,8 +43,10 @@ class CreateForm(APIView):
 class AdminContactReader(APIView):
 	permission_classes = (permissions.IsAdminUser, )
 
-	def get(self, request, format=None):
+	def get(self, request, year=None, month=None, format=None):
 		contacts = Contact.objects.all()
+		if all([year, month]):
+			contacts = Contact.objects.filter(datetime__year=year, datetime__month=month)
 		serializer = ContactSerializer(instance=contacts, many=True)
 		return Response(status=status.HTTP_200_OK, data=serializer.data)
 
