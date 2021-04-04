@@ -8,6 +8,9 @@ from django.contrib.auth.models import User
 from .models import Contact, MassEmail
 from .utils import get_client_ip
 from .serializers import ContactSerializer
+from . import settings_loader
+
+
 class CreateForm(APIView):
 	permission_classes = (permissions.AllowAny, )
 
@@ -31,11 +34,12 @@ class CreateForm(APIView):
 			contact.address = request.data["address"]
 
 		contact.save()
-		admin_name = list(User.objects.filter(is_superuser=True, is_staff=True).values_list("first_name", flat=True))[0]
-		mail_subject = "{0} Contact Us ".format(settings.APP_NAME)
-		message = "dear '{0}',\n we got your email. we will response as soon as possible.\n\nBest Regards '{1}'".format(contact.name, admin_name)
-		to_email = contact.email
-		send_email = EmailMessage(mail_subject, message, to=[to_email]).send()
+		if settings_loader.DEFAULT_CONTACT_US_SETTINGS["SEND_MAIL"]:
+			admin_name = list(User.objects.filter(is_superuser=True, is_staff=True).values_list("first_name", flat=True))[0]
+			mail_subject = settings_loader.DEFAULT_CONTACT_US_SETTINGS["APP_NAME"] + settings_loader.DEFAULT_CONTACT_US_SETTINGS["MAIL_SUBJECT"]
+			message = "dear, " + contact.name + settings_loader.DEFAULT_CONTACT_US_SETTINGS["MESSAGE"] + admin_name
+			to_email = contact.email
+			send_email = EmailMessage(mail_subject, message, to=[to_email]).send()
 
 		return Response(status=status.HTTP_200_OK, data={"detail": "form created."})
 
