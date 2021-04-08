@@ -1,8 +1,11 @@
 from django.db import models
 from .utils import random_key
+
+
 class ReadedManager(models.Manager):
 	def get_queryset(self):
 		return super(ReadedManager, self).get_queryset().filter(is_readed=True)
+
 
 class Contact(models.Model):
 	key = models.CharField(default=random_key, unique=True, max_length=13)
@@ -22,6 +25,7 @@ class Contact(models.Model):
 	def __str__(self):
 		return self.name
 
+
 class MassEmail(models.Model):
 	key = models.CharField(default=random_key, max_length=13, unique=True)
 	datetime = models.DateTimeField(auto_now=True)
@@ -31,3 +35,4 @@ class MassEmail(models.Model):
 
 	def __str__(self):
 		return self.name
+
