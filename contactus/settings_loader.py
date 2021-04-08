@@ -1,5 +1,4 @@
-from rest_framework.response import Response
-from rest_framework import status
+
 DEFAULT_CONTACT_US_SETTINGS = {
 	'APP_NAME': None,
 	'SEND_MAIL': False,
@@ -21,5 +20,4 @@ for field in fields:
 try:
 	from django.conf.settings import EMAIL_USE_TLS, EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
 except ImportError:
-	print("ERROR: No Email Configuration Found in projects settings.py."+'configure : "EMAIL_USE_TLS", "EMAIL_HOST", "EMAIL_PORT", "EMAIL_HOST_USER", "EMAIL_HOST_PASSWORD"'+ "or Set SEND_MAIL=False")
-
+	print("ERROR: No Email Configuration Found in projects settings.py." + 'configure : "EMAIL_USE_TLS", "EMAIL_HOST", "EMAIL_PORT", "EMAIL_HOST_USER", "EMAIL_HOST_PASSWORD"' + "or Set SEND_MAIL=False")
